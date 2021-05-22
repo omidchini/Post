@@ -18,7 +18,7 @@ namespace Post.WebUI.Controllers {
         }
 
         [HttpGet("{id}")]
-        public async Task<FileResult> Get(int id) {
+        public async Task<FileResult> Export(int id) {
             var vm = await Mediator.Send(new ExportDeliveriesQuery { ZoneId = id });
 
             return File(vm.Content, vm.ContentType, vm.FileName);

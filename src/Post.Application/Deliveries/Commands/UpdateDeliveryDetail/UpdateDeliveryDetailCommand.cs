@@ -11,5 +11,7 @@ namespace Post.Application.Deliveries.Commands.UpdateDeliveryDetail {
         public string Note { get; set; }
 
         public PriorityLevel Priority { get; set; }
+
+        public string Title { get; set; }
     }
 }

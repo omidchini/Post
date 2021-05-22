@@ -33,8 +33,12 @@
       <div class="clearfix">
         <h2 class="float-left">{{ selectedZone.title }}</h2>
         <button id="zoneOptions" class="btn btn-default float-right" title="Zone Options..."
-          (click)="showZoneOptionsModal(zoneOptionsModalTemplate)">
+                (click)="showZoneOptionsModal(zoneOptionsModalTemplate)">
           <fa-icon [icon]="faEllipsisH"></fa-icon>
+        </button>
+        <button id="zoneExport" class="btn btn-default float-right" title="Export Zone ..."
+                (click)="exportZone()">
+          <fa-icon [icon]="faFileExcel"></fa-icon>
         </button>
       </div>
       <ul id="deliveries" class="list-group mb-2">
@@ -111,6 +115,10 @@
   </div>
   <div class="modal-body">
     <div class="form">
+      <div class="form-group">
+        <label for="note">Title</label>
+        <textarea id="title" class="form-control" rows="1" [(ngModel)]="deliveryDetailsEditor.title"></textarea>
+      </div>
       <div class="form-group">
         <label for="zone">Zone</label>
         <select class="form-control" [(ngModel)]="deliveryDetailsEditor.zoneId">

@@ -25,6 +25,7 @@ namespace Post.Application.Deliveries.Commands.UpdateDeliveryDetail {
             entity.ZoneId = request.ZoneId;
             entity.Priority = request.Priority;
             entity.Note = request.Note;
+            entity.Title = request.Title;
 
             await _context.SaveChangesAsync(cancellationToken);
 

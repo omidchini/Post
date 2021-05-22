@@ -375,7 +375,7 @@ export class DeliveryClient implements IDeliveryClient {
 export interface IZoneClient {
     get(): Observable<DeliveriesVm>;
     create(command: CreateZoneCommand): Observable<number>;
-    get2(id: number): Observable<FileResponse>;
+    export(id: number): Observable<FileResponse>;
     update(id: number, command: UpdateZoneCommand): Observable<FileResponse>;
     delete(id: number): Observable<FileResponse>;
 }
@@ -493,7 +493,7 @@ export class ZoneClient implements IZoneClient {
         return _observableOf<number>(<any>null);
     }
 
-    get2(id: number): Observable<FileResponse> {
+    export(id: number): Observable<FileResponse> {
         let url_ = this.baseUrl + "/api/Zone/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -509,11 +509,11 @@ export class ZoneClient implements IZoneClient {
         };
 
         return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
-            return this.processGet2(response_);
+            return this.processExport(response_);
         })).pipe(_observableCatch((response_: any) => {
             if (response_ instanceof HttpResponseBase) {
                 try {
-                    return this.processGet2(<any>response_);
+                    return this.processExport(<any>response_);
                 } catch (e) {
                     return <Observable<FileResponse>><any>_observableThrow(e);
                 }
@@ -522,7 +522,7 @@ export class ZoneClient implements IZoneClient {
         }));
     }
 
-    protected processGet2(response: HttpResponseBase): Observable<FileResponse> {
+    protected processExport(response: HttpResponseBase): Observable<FileResponse> {
         const status = response.status;
         const responseBlob =
             response instanceof HttpResponse ? response.body :
@@ -894,6 +894,7 @@ export class UpdateDeliveryDetailCommand implements IUpdateDeliveryDetailCommand
     zoneId?: number;
     note?: string | undefined;
     priority?: PriorityLevel;
+    title?: string | undefined;
 
     constructor(data?: IUpdateDeliveryDetailCommand) {
         if (data) {
@@ -910,6 +911,7 @@ export class UpdateDeliveryDetailCommand implements IUpdateDeliveryDetailCommand
             this.zoneId = _data["zoneId"];
             this.note = _data["note"];
             this.priority = _data["priority"];
+            this.title = _data["title"];
         }
     }
 
@@ -926,6 +928,7 @@ export class UpdateDeliveryDetailCommand implements IUpdateDeliveryDetailCommand
         data["zoneId"] = this.zoneId;
         data["note"] = this.note;
         data["priority"] = this.priority;
+        data["title"] = this.title;
         return data; 
     }
 }
@@ -935,6 +938,7 @@ export interface IUpdateDeliveryDetailCommand {
     zoneId?: number;
     note?: string | undefined;
     priority?: PriorityLevel;
+    title?: string | undefined;
 }
 
 export enum PriorityLevel {

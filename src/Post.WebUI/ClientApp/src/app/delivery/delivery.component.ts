@@ -4,7 +4,7 @@ import {
   DeliveriesVm, ZoneClient, ZoneDto, CreateZoneCommand, UpdateZoneCommand,
   UpdateDeliveryDetailCommand
 } from '../web-api-client';
-import { faPlus, faEllipsisH } from '@fortawesome/free-solid-svg-icons';
+import { faPlus, faEllipsisH, faFileExcel } from '@fortawesome/free-solid-svg-icons';
 import { BsModalService, BsModalRef } from 'ngx-bootstrap/modal';
 
 @Component({
@@ -32,6 +32,7 @@ export class DeliveryComponent {
 
   faPlus = faPlus;
   faEllipsisH = faEllipsisH;
+  faFileExcel = faFileExcel;
 
   constructor(private zoneClient: ZoneClient, private deliveryClient: DeliveryClient, private modalService: BsModalService) {
     zoneClient.get().subscribe(
@@ -45,7 +46,7 @@ export class DeliveryComponent {
     );
   }
 
-  // Lists
+  // Zones
   remainingDeliveries(zone: ZoneDto): number {
     return zone.items.filter(t => !t.done).length;
   }
@@ -124,8 +125,24 @@ export class DeliveryComponent {
     );
   }
 
-  // Items
+  exportZone(): void {
+    this.zoneClient.export(this.selectedZone.id).subscribe(
+      result => {
+        var link = document.createElement("a");
+        link.setAttribute("href", URL.createObjectURL(result.data));
+        link.setAttribute("download", result.fileName);
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
 
+        console.log('Export succeeded.');
+      },
+      error => console.error(error)
+    );
+  }
+
+  // Delivery
   showDeliveryDetailsModal(template: TemplateRef<any>, item: DeliveryDto): void {
     this.selectedDelivery = item;
     this.deliveryDetailsEditor = {
@@ -148,6 +165,7 @@ export class DeliveryComponent {
 
           this.selectedDelivery.priority = this.deliveryDetailsEditor.priority;
           this.selectedDelivery.note = this.deliveryDetailsEditor.note;
+          this.selectedDelivery.title = this.deliveryDetailsEditor.title;
           this.deliveryDetailsModalRef.hide();
           this.deliveryDetailsEditor = {};
         },

@@ -330,7 +330,7 @@
         "tags": [
           "Zone"
         ],
-        "operationId": "Zone_Get2",
+        "operationId": "Zone_Export",
         "parameters": [
           {
             "name": "id",
@@ -577,6 +577,10 @@
           },
           "priority": {
             "$ref": "#/components/schemas/PriorityLevel"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
