@@ -1,0 +1,195 @@
+<h1>Deliveries</h1>
+
+<p>This is a simple Delivery list component.</p>
+
+<p *ngIf="!vm"><em>Loading...</em></p>
+
+<div *ngIf="vm">
+
+  <div class="row">
+    <div class="col-sm-4">
+      <div class="clearfix">
+        <h2 class="float-left">Zones</h2>
+        <button class="btn btn-default float-right" title="Add Zone..."
+          (click)="showNewZoneModal(newZoneModalTemplate)">
+          <fa-icon [icon]="faPlus"></fa-icon>
+        </button>
+      </div>
+      <ul class="list-group">
+        <li *ngFor="let zone of vm.zones; index as i" class="list-group-item"
+          [ngClass]="{ 'active': selectedZone == zone }" (click)="selectedZone = zone">
+          <div class="clearfix">
+            <div class="float-left">
+              {{ zone.title }}
+            </div>
+            <div class="float-right text-right">
+              <span class="badge badge-light">{{ remainingDeliveries(zone) }}</span>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="col-sm-8" *ngIf="selectedZone">
+      <div class="clearfix">
+        <h2 class="float-left">{{ selectedZone.title }}</h2>
+        <button id="zoneOptions" class="btn btn-default float-right" title="Zone Options..."
+          (click)="showZoneOptionsModal(zoneOptionsModalTemplate)">
+          <fa-icon [icon]="faEllipsisH"></fa-icon>
+        </button>
+      </div>
+      <ul id="deliveries" class="list-group mb-2">
+        <li class="list-group-item" *ngFor="let item of selectedZone.items; index as i">
+          <div class="d-flex">
+            <div class="delivery-checkbox">
+              <input type="checkbox" [(ngModel)]="item.done" (change)="updateDelivery(item)" />
+            </div>
+            <div class="flex-fill">
+              <input id="{{ 'itemTitle' + i }}" *ngIf="item == selectedDelivery" type="text"
+                class="form-control item-input-control" [(ngModel)]="item.title" (keyup.enter)="updateDelivery(item, true)"
+                (blur)="updateDelivery(item)" autofocus="autofocus" />
+              <div class="delivery-title form-control item-input-control" *ngIf="item != selectedDelivery" [ngClass]="{ 'done-delivery': item.done }"
+                (click)="editDelivery(item, 'itemTitle' + i)">
+                <span>{{ item.title }}</span>
+              </div>
+            </div>
+            <div class="delivery-commands">
+              <button *ngIf="item.id != 0" (click)="showDeliveryDetailsModal(deliveryDetailsModalTemplate, item)"
+                class="btn btn-default btn-xs" role="button">
+                <fa-icon [icon]="faEllipsisH"></fa-icon>
+              </button>
+            </div>
+          </div>
+        </li>
+        <li class="list-group-item" (click)="addDelivery()">
+          <button class="btn btn-default">Add Item...</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="debug">
+  <pre>{{ vm | json }}</pre>
+</div>
+
+<ng-template #zoneOptionsModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Zone Options</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="zoneOptionsModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="inputZoneTitle">Title</label>
+      <input type="text" class="form-control" id="inputZoneTitle" placeholder="Zone name..."
+        [(ngModel)]="zoneOptionsEditor.title" (keyup.enter)="updateZoneOptions()" />
+    </div>
+    <div *ngIf="debug">
+      <pre>{{ zoneOptionsEditor | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="clearfix">
+      <div class="float-left">
+        <button class="btn btn-default text-danger" (click)="confirmDeleteZone(deleteZoneModalTemplate)">Delete</button>
+      </div>
+      <div class="float-right">
+        <button class="btn btn-default" (click)="zoneOptionsModalRef.hide()">Cancel</button>
+        <button class="btn btn-primary" (click)="updateZoneOptions()">Update</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #deliveryDetailsModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Delivery Details</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="deliveryDetailsModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form">
+      <div class="form-group">
+        <label for="zone">Zone</label>
+        <select class="form-control" [(ngModel)]="deliveryDetailsEditor.zoneId">
+          <option [ngValue]="zone.id" *ngFor="let zone of vm.zones">{{ zone.title }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="priority">Priority</label>
+        <select class="form-control" [(ngModel)]="deliveryDetailsEditor.priority">
+          <option [ngValue]="level.value" *ngFor="let level of vm.priorityLevels">{{ level.name }}</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="note">Note</label>
+        <textarea id="note" class="form-control" rows="3" [(ngModel)]="deliveryDetailsEditor.note"></textarea>
+      </div>
+    </div>
+    <div *ngIf="debug">
+      <pre>{{ deliveryDetailsEditor | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="clearfix">
+      <div class="float-left">
+        <button class="btn btn-default text-danger" (click)="deleteDelivery(selectedDelivery)">Delete</button>
+      </div>
+      <div class="float-right">
+        <button class="btn btn-default" (click)="deliveryDetailsModalRef.hide()">Cancel</button>
+        <button class="btn btn-primary" (click)="updateDeliveryDetails()">Update</button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #deleteZoneModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">Delete "{{ selectedZone?.title }}"?</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="deleteZoneModalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <p>All items will be permanently deleted. </p>
+    <div *ngIf="debug">
+      <pre>{{ selectedZone | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="text-right">
+      <button type="button" class="btn btn-default" (click)="deleteZoneModalRef.hide()">Cancel</button>
+      <button type="button" class="btn btn-danger" (click)="deleteZoneConfirmed()">Delete</button>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #newZoneModalTemplate>
+  <div class="modal-header clearfix">
+    <h4 class="modal-title float-left">New Zone</h4>
+    <button type="button" class="close float-right" aria-label="Close" (click)="newZoneCancelled()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <div class="form-group">
+      <label for="title">Title</label>
+      <input type="text" class="form-control" id="title" placeholder="Zone title..." [(ngModel)]="newZoneEditor.title"
+        [ngClass]="{ 'is-invalid': newZoneEditor.error }" (keyup.enter)="addZone()" />
+      <div *ngIf="newZoneEditor.error" class="invalid-feedback">
+        {{ newZoneEditor.error }}
+      </div>
+    </div>
+    <div *ngIf="debug">
+      <pre>{{ newZoneEditor | json }}</pre>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <div class="text-right">
+      <button class="btn btn-default" (click)="newZoneCancelled()">Cancel</button>
+      <button class="btn btn-primary" (click)="addZone()">Create</button>
+    </div>
+  </div>
+</ng-template>
